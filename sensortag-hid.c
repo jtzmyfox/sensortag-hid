@@ -47,16 +47,16 @@
 
 static gint bluez_id = 0;
 GMainLoop *loop = NULL;
-GDBusConnection *c = NULL;
+GDBusConnection *dbus_connection = NULL;
 
 /**
  * Called at exit
  * */
 void cleanup() {
 
-	if (c) {
-		bluez_cleanup(c);
-		c = NULL;
+	if (dbus_connection) {
+		bluez_cleanup(dbus_connection);
+		dbus_connection = NULL;
 	}
 
 	if (bluez_id) {
@@ -78,7 +78,7 @@ static void sig_handler(int signo) {
 static void on_bluez_appeared(GDBusConnection *connection, const gchar *name,
 								  const gchar *name_owner, gpointer user_data) {
 
-	c = connection;
+	dbus_connection = connection;
 	if (!bluez_setup(connection)) {
 		printf("Unable to setup bluez watchers\n");
 		cleanup();
