@@ -54,68 +54,68 @@ GDBusConnection *dbus_connection = NULL;
  * */
 void cleanup() {
 
-	if (dbus_connection) {
-		bluez_cleanup(dbus_connection);
-		dbus_connection = NULL;
-	}
+    if (dbus_connection) {
+        bluez_cleanup(dbus_connection);
+        dbus_connection = NULL;
+    }
 
-	if (bluez_id) {
-		g_bus_unwatch_name(bluez_id);
-		bluez_id = 0;
-	}
+    if (bluez_id) {
+        g_bus_unwatch_name(bluez_id);
+        bluez_id = 0;
+    }
 
-	uhid_cleanup();
+    uhid_cleanup();
 
-	if (loop && g_main_loop_is_running(loop))
-		g_main_loop_quit(loop);
+    if (loop && g_main_loop_is_running(loop))
+        g_main_loop_quit(loop);
 }
 
 static void sig_handler(int signo) {
-	if (signo == SIGINT || signo == SIGTERM)
-		cleanup();
+    if (signo == SIGINT || signo == SIGTERM)
+        cleanup();
 }
 
 static void on_bluez_appeared(GDBusConnection *connection, const gchar *name,
-								  const gchar *name_owner, gpointer user_data) {
+                                  const gchar *name_owner, gpointer user_data) {
 
-	dbus_connection = connection;
-	if (!bluez_setup(connection)) {
-		printf("Unable to setup bluez watchers\n");
-		cleanup();
-	}
+    dbus_connection = connection;
+    if (!bluez_setup(connection)) {
+        printf("Unable to setup bluez watchers\n");
+        cleanup();
+    }
 
-	if (!uhid_init()) {
-		printf("Unable to init uhid\n");
-		cleanup();
-	}
+    if (!uhid_init()) {
+        printf("Unable to init uhid\n");
+        cleanup();
+    }
 }
 
 static void on_bluez_vanished(GDBusConnection *connection, const gchar *name,
-														  gpointer user_data) {
-	
-	bluez_cleanup(connection);
+                                                          gpointer user_data) {
+    
+    bluez_cleanup(connection);
 }
 
 int main(int argc, char **argv) {
 
-	if (atexit(cleanup)) {
-		printf("Cannot register cleanup callback\n");
-		return 1;
-	}
-	
-	if (signal(SIGINT, &sig_handler) == SIG_ERR ||
-		signal(SIGTERM, &sig_handler) == SIG_ERR) {
-		printf("Cannot register sig handler\n");
-		return 1;
-	}
+    if (atexit(cleanup)) {
+        printf("Cannot register cleanup callback\n");
+        return 1;
+    }
+    
+    if (signal(SIGINT, &sig_handler) == SIG_ERR ||
+        signal(SIGTERM, &sig_handler) == SIG_ERR) {
+        printf("Cannot register sig handler\n");
+        return 1;
+    }
 
-	loop = g_main_loop_new(NULL, FALSE);
-	bluez_id = g_bus_watch_name(G_BUS_TYPE_SYSTEM, BLUEZ_BUS_NAME,
-								G_BUS_NAME_WATCHER_FLAGS_AUTO_START,
-								on_bluez_appeared, on_bluez_vanished,
-								NULL, NULL);
+    loop = g_main_loop_new(NULL, FALSE);
+    bluez_id = g_bus_watch_name(G_BUS_TYPE_SYSTEM, BLUEZ_BUS_NAME,
+                                G_BUS_NAME_WATCHER_FLAGS_AUTO_START,
+                                on_bluez_appeared, on_bluez_vanished,
+                                NULL, NULL);
 
-	g_main_loop_run(loop);
+    g_main_loop_run(loop);
 
-	return 0;
+    return 0;
 }
