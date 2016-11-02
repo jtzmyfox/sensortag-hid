@@ -43,10 +43,8 @@
 #include "bluez-gatt-client.h"
 #include "uhid.h"
 
-#define OWN_BUS_NAME "demo.sensortag.hid"
 #define BLUEZ_BUS_NAME "org.bluez"
 
-static gint owner_id = 0;
 static gint bluez_id = 0;
 GMainLoop *loop = NULL;
 GDBusConnection *c = NULL;
@@ -59,11 +57,6 @@ void cleanup() {
 	if (c) {
 		bluez_cleanup(c);
 		c = NULL;
-	}
-
-	if (owner_id) {
-		g_bus_unown_name(owner_id);
-		owner_id = 0;
 	}
 
 	if (bluez_id) {
@@ -103,24 +96,6 @@ static void on_bluez_vanished(GDBusConnection *connection, const gchar *name,
 	bluez_cleanup(connection);
 }
 
-static void on_name_acquired(GDBusConnection *connection, const gchar *name,
-														 gpointer user_data) {
-
-	bluez_id = g_bus_watch_name(G_BUS_TYPE_SYSTEM, BLUEZ_BUS_NAME,
-								G_BUS_NAME_WATCHER_FLAGS_AUTO_START,
-								on_bluez_appeared, on_bluez_vanished,
-								NULL, NULL);
-
-}
-
-static void on_name_lost(GDBusConnection *connection, const gchar *name,
-													 gpointer user_data) {
-
-	printf("Name lost, terminating.\n");
-	exit(1);
-
-}
-
 int main(int argc, char **argv) {
 
 	if (atexit(cleanup)) {
@@ -135,11 +110,10 @@ int main(int argc, char **argv) {
 	}
 
 	loop = g_main_loop_new(NULL, FALSE);
-	
-	owner_id = g_bus_own_name(G_BUS_TYPE_SYSTEM, OWN_BUS_NAME,
-							  G_BUS_NAME_OWNER_FLAGS_NONE, NULL,
-							  on_name_acquired, on_name_lost,
-							  NULL, NULL);
+	bluez_id = g_bus_watch_name(G_BUS_TYPE_SYSTEM, BLUEZ_BUS_NAME,
+								G_BUS_NAME_WATCHER_FLAGS_AUTO_START,
+								on_bluez_appeared, on_bluez_vanished,
+								NULL, NULL);
 
 	g_main_loop_run(loop);
 

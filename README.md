@@ -24,14 +24,6 @@ If not, update your service file and restart the bluetooth service :
 > systemctl daemon-reload
 > systemctl restart bluetooth.service
 
-Install the 'demo.sensortag.hid.conf' file in the dbus system policy dir : 
-
-sudo cp demo.sensortag.hid.conf /etc/dbus-1/system.d/
-
-Force dbus-daemon to update its policies : 
-
-> sudo pkill dbus-daemon -SIGHUP
-
 Before using your sensortag, it must have been connected once to your system :
 
 > bluetoothctl
