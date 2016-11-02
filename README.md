@@ -10,39 +10,50 @@ To use :
 
 Make sure that you bluez is version 5 :
 
->bluetoothctl --version
+~~~
+$ bluetoothctl --version
 5.37
-
+~~~
 Make sure experimental support is enabled with bluez : 
 
-> cat /lib/systemd/system/bluetooth.service
+~~~
+$ cat /lib/systemd/system/bluetooth.service
 [...]
 ExecStart=/usr/local/libexec/bluetooth/bluetoothd -E
 [...]
+~~~
 
 If not, update your service file and restart the bluetooth service : 
-> systemctl daemon-reload
-> systemctl restart bluetooth.service
+
+~~~
+$ systemctl daemon-reload
+$ systemctl restart bluetooth.service
+~~~
 
 Before using your sensortag, it must have been connected once to your system :
 
-> bluetoothctl
->  scan on
-
+~~~
+$ bluetoothctl
+[bluetooth]# scan on
+~~~
 Push on the sensortag's power button to start advertising
 
-> scan off
-> connect <your sensortag's macaddr>
-> quit
-
+~~~
+[bluetooth]# scan off
+[bluetooth]# connect <macaddr>
+[sensortag]# quit
+~~~
 You can now launch sensortag-hid : 
 
-sudo ./sensortag-hidd
-
+~~~
+$ sudo ./sensortag-hidd
+~~~
 # TODO
 
 Currently there might be issues if more than one sensortag is present in your
 known-devices database. Be sure to remove the sensortag you don't use using :
-> bluetoothctl
-> list
-> remove <unused sensortag macaddr>
+~~~
+$ bluetoothctl
+[bluetooth]# list
+[bluetooth]# remove <unused sensortag macaddr>
+~~~
